@@ -54,13 +54,17 @@ class DylibHijackScanner(object):
 		except Exception:
 			return {}
 
-	def _perform_scanning(self):
+	def _perform_rpath_scanning(self):
 		"""
 		Perform a scanning to determine whether DYLIB Hijacking are possible.
 		:param self: DylibHijackScanner
 		:return: Vulnerable binary with its library.
 		:rtype: dict
 		"""
+		for file in self.files_to_scan:
+			scan_item = self._get_rpaths_and_libraries(file)
+			if scan_item:
+				self.scan_items[file] = scan_item
 		vulnerable_libraries = {}
 		for file, entry in self.scan_items.items():
 			executable_path = '/'.join(file.split(os.sep)[:-1])
@@ -79,15 +83,10 @@ class DylibHijackScanner(object):
 
 	def scan(self):
 		assert os.path.isdir(self.directory_to_scan)
-		for file in self.files_to_scan:
-			scan_item = self._get_rpaths_and_libraries(file)
-			if scan_item:
-				self.scan_items[file] = scan_item
-
 		started_at = str(datetime.now())
 		print(f"Gathering all files at: {self.directory_to_scan}")
 		print(f"Found {len(self.files_to_scan)} files, performing analysis...")
-		vulnerable_libraries = self._perform_scanning()
+		vulnerable_libraries = self._perform_rpath_scanning()
 		ended_at = str(datetime.now())
 		if vulnerable_libraries:
 			print("These are the vulnerable binaries")
