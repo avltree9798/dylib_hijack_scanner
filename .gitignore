@@ -1,2 +1,6 @@
 .venv
 .idea
+tests/__pycache__/*
+modules/dylib_hijack_scanner/__pycache__/
+modules/dylib_hijack_scanner.egg-info/
+.tox
