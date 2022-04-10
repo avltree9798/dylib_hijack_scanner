@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.9
+      - image: circleci/tox
     steps:
       - checkout
       - restore_cache:
@@ -19,6 +19,7 @@ jobs:
       - run:
           name: Running tests
           command: |
+            . venv/bin/activate
             make test
       - store_artifacts:
           path: test-reports/
