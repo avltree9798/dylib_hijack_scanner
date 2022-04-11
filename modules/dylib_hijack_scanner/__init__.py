@@ -4,6 +4,7 @@ import json
 from pprint import pprint
 from datetime import datetime
 from machotools import rewriter_factory
+from machotools.errors import MachoError
 
 
 class DylibHijackScanner(object):
@@ -38,6 +39,7 @@ class DylibHijackScanner(object):
 		try:
 			rewriter = rewriter_factory(file)
 			rpaths = rewriter.rpaths
+			weak_dylibs = rewriter.weak_dylibs
 			if len(rpaths) == 0:
 				return {}
 
@@ -49,12 +51,13 @@ class DylibHijackScanner(object):
 			if len(libraries) > 0:
 				return {
 					'rpaths': rewriter.rpaths,
-					'libraries': libraries
+					'libraries': libraries,
+					'weak_libraries': weak_dylibs
 				}
-		except Exception:
+		except MachoError:
 			return {}
 
-	def _perform_rpath_scanning(self):
+	def _perform_scanning(self):
 		"""
 		Perform a scanning to determine whether DYLIB Hijacking are possible.
 		:param self: DylibHijackScanner
@@ -79,6 +82,10 @@ class DylibHijackScanner(object):
 						vulnerable_libraries[file] = f"{original_rpath}{library}"
 						continue
 
+			for weak_library in entry.get('weak_libraries'):
+				if not os.path.isfile(weak_library):
+					vulnerable_libraries[file] = weak_library
+
 		return vulnerable_libraries
 
 	def scan(self):
@@ -86,7 +93,7 @@ class DylibHijackScanner(object):
 		started_at = str(datetime.now())
 		print(f"Gathering all files at: {self.directory_to_scan}")
 		print(f"Found {len(self.files_to_scan)} files, performing analysis...")
-		vulnerable_libraries = self._perform_rpath_scanning()
+		vulnerable_libraries = self._perform_scanning()
 		ended_at = str(datetime.now())
 		if vulnerable_libraries:
 			print("These are the vulnerable binaries")
