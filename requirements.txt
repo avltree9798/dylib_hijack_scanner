@@ -1,2 +1,2 @@
-machotools==0.2.0
+git+https://github.com/avltree9798/machotools@master#egg=machotools
 argparse==1.4.0
