@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="dylib_hijack_scanner"),
     python_requires=">=3.7",
     install_requires=[
-        'machotools==0.2.0',
+        'machotools @ git+https://github.com/avltree9798/machotools@master#egg=machotools',
         'argparse==1.4.0'
     ]
 )
